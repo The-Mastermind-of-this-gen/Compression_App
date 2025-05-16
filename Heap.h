@@ -12,19 +12,19 @@ enum ErrorCodes {
     HEAP_UNDERFLOW = 0
 };
 
-// ===== Min Heap Template =====
+// ===== Max Heap Template =====
 template<typename Input>
 class Heap {
-private:
-    Input* arr;
-    int count; // number of elements in the heap
-    int size;
-
 public:
+    Input* arr;
+    int size;  // Array Size
+    int count;
+    int BlockSize;// Number of elements in the heap
     Heap() {
         arr = NULL;
         count = 0;
         size = 0;
+        BlockSize = 100;
     }
 
     ~Heap() {
@@ -35,24 +35,24 @@ public:
         if (sz <= 0)
             return false;
 
-        if (arr != nullptr)
+        if (arr != NULL)
             delete[] arr;
 
         arr = new(nothrow) Input[sz];
-        if (arr == nullptr)
+        if (arr == NULL)
             return false;
 
         size = sz;
+        BlockSize = sz;
         return true;
     }
 
     void HeapifyUp(int index) {
         int parentIndex = (index - 1) / 2;
-        while (index > 0 && arr[parentIndex].BitFreq > arr[index].BitFreq) {
+        while (index > 0 && arr[parentIndex].BitFreq < arr[index].BitFreq) {
             Input temp = arr[index];
             arr[index] = arr[parentIndex];
             arr[parentIndex] = temp;
-
             index = parentIndex;
             parentIndex = (index - 1) / 2;
         }
@@ -63,24 +63,24 @@ public:
         while (true) {
             int leftChildIndex = 2 * parentIndex + 1;
             int rightChildIndex = 2 * parentIndex + 2;
-            int smallestChildIndex;
+            int largestChildIndex;
 
             if (leftChildIndex >= count)
                 break;
 
-            if (rightChildIndex < count && arr[rightChildIndex].BitFreq < arr[leftChildIndex].BitFreq)
-                smallestChildIndex = rightChildIndex;
+            if (rightChildIndex < count && arr[rightChildIndex].BitFreq > arr[leftChildIndex].BitFreq)
+                largestChildIndex = rightChildIndex;
             else
-                smallestChildIndex = leftChildIndex;
+                largestChildIndex = leftChildIndex;
 
-            if (arr[parentIndex].BitFreq <= arr[smallestChildIndex].BitFreq)
+            if (arr[parentIndex].BitFreq >= arr[largestChildIndex].BitFreq)
                 break;
 
-            Input temp = arr[smallestChildIndex];
-            arr[smallestChildIndex] = arr[parentIndex];
+            Input temp = arr[largestChildIndex];
+            arr[largestChildIndex] = arr[parentIndex];
             arr[parentIndex] = temp;
 
-            parentIndex = smallestChildIndex;
+            parentIndex = largestChildIndex;
         }
     }
 
@@ -92,14 +92,14 @@ public:
         return count == 0;
     }
 
-    int insert(Input num) {
-        if (arr == nullptr)
+    int insert(Input NewTreeNode) {
+        if (arr == NULL)
             return HEAP_NOT_INITIALIZED;
 
         if (isFull())
-            return HEAP_OVERFLOW;
+            Array_Resize();
 
-        arr[count] = num;
+        arr[count] = NewTreeNode;
         HeapifyUp(count);
         count++;
         return 1;
@@ -112,13 +112,27 @@ public:
         if (isEmpty())
             return HEAP_UNDERFLOW;
 
-        if (d == Input{})
-            return 0;
+        if (d != NULL)
+            *d = arr[0];
+            
 
-        *d = arr[0];
         arr[0] = arr[count - 1];
         count--;
         HeapifyDown();
         return 1;
+    }
+    void Array_Resize() 
+    {
+        Input* temp = new(nothrow) Input[count+BlockSize];
+        if (temp == NULL)
+            return;
+        for (int i=0;i<count;i++) 
+        {
+            temp[i] = arr[i];
+        }
+        delete[]arr;
+        arr = temp;
+        size = count + BlockSize;
+        return;
     }
 };
