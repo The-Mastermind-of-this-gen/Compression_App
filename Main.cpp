@@ -3,7 +3,7 @@
 #include<stdlib.h>
 #include <new>
 #include "Heap.h"//We made this class
-#include "HaffmanTree.h"// We also made this class
+#include "HuffmanTree.h"// We also made this class
 
 int main() 
 {
